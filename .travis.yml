@@ -1,0 +1,12 @@
+language: perl6
+perl6:
+  - latest
+  - nom
+
+install:
+  - rakudobrew build zef
+  - zef --depsonly install .
+
+script:
+  - zef install Test::META FindBin LWP::Simple IO::Socket::SSL
+  - prove -e 'perl6' ./.travis/testpackagemeta.pl
