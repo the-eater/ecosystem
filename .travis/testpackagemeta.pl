@@ -4,12 +4,18 @@ use JSON::Fast;
 use Test;
 use Test::META;
 
-my $diffproc = run 'git', 'diff', '--no-color', '-p', '-U0', %*ENV<TRAVIS_COMMIT>, %*ENV<TRAVIS_PULL_REQUEST_SHA>, '--', 'META.list', :out;
+if ! defined %*ENV<TRAVIS_COMMIT_RANGE> {
+    say "TRAVIS_COMMIT_RANGE wasn't set, don't know what to do.";
+    exit 1;
+}
+
+my ($from, $to) = split("...", %*ENV<TRAVIS_COMMIT_RANGE>);
+
+my $diffproc = run 'git', 'diff', '--no-color', '-p', '-U0', $from, $to, '--', 'META.list', :out;
 my $metadiff = $diffproc.out.slurp-rest;
 
 if $metadiff ~~ /^\s*$/ {
   say "Nothing changed all fine.";
-  ok 1, "all fine";
   exit 0;
 }
 
@@ -34,48 +40,67 @@ if (@urls.end lt 0) {
 my $amountUrls = @urls.end + 1;
 say "$amountUrls packages were added";
 
-  plan $amountUrls;
+plan $amountUrls;
 
-  my $lwp = LWP::Simple.new();
+my $lwp = LWP::Simple.new();
 
-  my $oldpwd = $*CWD;
+my $oldpwd = $*CWD;
 
-  for @urls -> $url {
-    subtest {
-      my $sourcedir;
-      lives-ok {
-        my $meta = from-json($lwp.get($url));
+my @failed = ();
 
-        if ! $meta<source-url> {
-          bail-out "no source-url defined in META file";
-        }
+for @urls -> $url {
+  my $subres = subtest {
+    my $sourcedir;
+    my $res = lives-ok {
+      my $resp = $lwp.get($url);
+      if ! defined $resp {
+          fail "$url not reachable";
+          return;
+      }
 
-        $_ = $meta<name>;
-        s:g/\:\:/__/;
-        $sourcedir = $*TMPDIR ~ "/" ~ $_;
-        my $sourceurl = $meta<source-url>;
-        my $git = run "git", "clone", $sourceurl, $sourcedir;
-        if $git.exitcode ne 0 {
-          bail-out "Couldn't clone repo " ~ $sourceurl;
-        }
-      }, "Downloading $url";
+      my $meta = from-json($resp);
 
-      chdir($sourcedir);
+      if ! $meta<source-url> {
+          fail "no source-url defined in META file";
+          return;
+      }
 
-      my $*DIST-DIR = $sourcedir.IO;
-      my $*TEST-DIR //= Any;
-      my $*META-FILE //= Any;
-      meta-ok();
+      $_ = $meta<name>;
+      s:g/\:\:/__/;
+      $sourcedir = $*TMPDIR ~ "/" ~ $_;
+      my $sourceurl = $meta<source-url>;
+      my $git = run "git", "clone", $sourceurl, $sourcedir;
+      if $git.exitcode ne 0 {
+        fail "Couldn't clone repo " ~ $sourceurl;
+        return;
+      }
+    }, "Downloading $url";
 
-      my $zef = run "zef", "install", "--depsonly", "--/build", ".";
-      ok $zef.exitcode eq 0, "Able to install deps";
-      $zef = run "zef", "test", ".";
-      ok $zef.exitcode eq 0, "Package tests pass";
+    if $res {
+        chdir($sourcedir);
 
-      rm-all($sourcedir.IO);
-      chdir($oldpwd);
-    }, "Checking correctness of $url";
+        my $*DIST-DIR = $sourcedir.IO;
+        my $*TEST-DIR //= Any;
+        my $*META-FILE //= Any;
+        meta-ok();
+
+        my $zef = run "zef", "install", "--depsonly", "--/build", ".";
+        ok $zef.exitcode eq 0, "Able to install deps";
+        $zef = run "zef", "test", ".";
+        ok $zef.exitcode eq 0, "Package tests pass";
+
+        rm-all($sourcedir.IO);
+        chdir($oldpwd);
+    }
+  }, "Checking correctness of $url";
+
+  if ! $subres {
+      @failed.push: $url;
   }
+}
+
+say "\nThe following urls failed:\n" ~ @failed.join("\n");
+
 # When we have a directory first recurse, then remove it
 multi sub rm-all(IO::Path $path where :d) {
     .&rm-all for $path.dir;

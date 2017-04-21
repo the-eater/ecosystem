@@ -173,7 +173,7 @@ https://raw.githubusercontent.com/FROGGS/p6-Foo-v1.0.0/master/META.info
 https://raw.githubusercontent.com/FROGGS/p6-Foo-v1.2.0/master/META.info
 https://raw.githubusercontent.com/perlpilot/p6-Locale-US/master/META.info
 https://raw.githubusercontent.com/MattOates/Text--Emotion/master/META.info
-https://raw.githubusercontent.com/MattOates/Text--Homoglyph/master/META.info
+https://raw.githubusercontent.com/MattOates/Text--Homoglyph/master/META6.json
 https://raw.githubusercontent.com/sirrobert/Semantic-Versioning/master/META.info
 https://raw.githubusercontent.com/grondilu/openssl/master/META.info
 https://raw.githubusercontent.com/azawawi/farabi6/master/META6.json
@@ -505,7 +505,7 @@ https://raw.githubusercontent.com/jonathanstowe/RPi-Device-PiGlow/master/META6.j
 https://raw.githubusercontent.com/LLFourn/p6-CompUnit-Util/master/META6.json
 https://raw.githubusercontent.com/zoffixznet/perl6-IRC-Client-Plugin-Factoid/master/META6.json
 https://raw.githubusercontent.com/jnthn/p6-test-io-socket-async/master/META.info
-https://raw.githubusercontent.com/scmorrison/perl6-aws-pricing/master/META.info
+https://raw.githubusercontent.com/scmorrison/perl6-aws-pricing/master/META6.json
 https://raw.githubusercontent.com/zoffixznet/perl6-Test-Output/master/META6.json
 https://raw.githubusercontent.com/jonathanstowe/IO-Path-Mode/master/META6.json
 https://raw.githubusercontent.com/hoelzro/p6-native-resources/master/META.info
