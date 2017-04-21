@@ -4,7 +4,9 @@ use JSON::Fast;
 use Test;
 use Test::META;
 
-my $diffproc = run 'git', 'diff', '--no-color', '-p', '-U0', %*ENV<TRAVIS_COMMIT>, %*ENV<TRAVIS_PULL_REQUEST_SHA>, '--', 'META.list', :out;
+my ($from, $to) = split("...", $*ENV<TRAVIS_COMMIT_RANGE>);
+
+my $diffproc = run 'git', 'diff', '--no-color', '-p', '-U0', $from, $to, '--', 'META.list', :out;
 my $metadiff = $diffproc.out.slurp-rest;
 
 if $metadiff ~~ /^\s*$/ {
