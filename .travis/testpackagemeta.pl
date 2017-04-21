@@ -6,7 +6,7 @@ use Test::META;
 
 my ($from, $to) = split("...", %*ENV<TRAVIS_COMMIT_RANGE>);
 
-my $diffproc = run 'git', 'diff', '--no-color', '-p', '-U0', $to, $from, '--', 'META.list', :out;
+my $diffproc = run 'git', 'diff', '--no-color', '-p', '-U0', $from, $to, '--', 'META.list', :out;
 my $metadiff = $diffproc.out.slurp-rest;
 
 if $metadiff ~~ /^\s*$/ {
