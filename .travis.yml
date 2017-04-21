@@ -5,7 +5,6 @@ perl6:
 
 install:
   - rakudobrew build zef
-  - zef --depsonly install .
 
 script:
   - zef install Test::META FindBin LWP::Simple IO::Socket::SSL
