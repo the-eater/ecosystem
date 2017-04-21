@@ -94,10 +94,12 @@ for @urls -> $url {
     }
   }, "Checking correctness of $url";
 
-  @failed.push: $url;
+  if ! $subres {
+      @failed.push: $url;
+  }
 }
 
-say "The following urls failed:\n" ~ @failed.join("\n");
+say "\nThe following urls failed:\n" ~ @failed.join("\n");
 
 # When we have a directory first recurse, then remove it
 multi sub rm-all(IO::Path $path where :d) {
